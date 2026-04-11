@@ -35,11 +35,39 @@
             font-family: 'Playfair Display', serif;
         }
 
+        body.state-empty .filter-bar,
+        body.state-empty main#cafe-grid,
+        body.state-empty .actions {
+            display: none;
+        }
+
+        body.state-active .filter-bar,
+        body.state-active main#cafe-grid,
+        body.state-active .actions {
+            animation: fadeInGrid 0.4s ease 0.4s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInGrid {
+            to { opacity: 1; }
+        }
+
         header {
             text-align: center;
             padding: 100px 20px 40px;
             max-width: 800px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 0;
+        }
+
+        body.state-empty header {
+            min-height: 100vh;
+            padding-top: 0;
+            padding-bottom: 0;
         }
 
         header h1 {
@@ -341,7 +369,7 @@
         .error-state p { margin-bottom: 20px; font-weight: 500; }
     </style>
 </head>
-<body>
+<body class="state-empty">
 
     <header>
         <h1>Die besten Cafés in München</h1>
@@ -398,6 +426,15 @@
             let allPlaces = [];
             let nextPageToken = null;
             let currentFilter = 'all';
+            let hasSearched = false;
+
+            function triggerSearchState() {
+                if (!hasSearched) {
+                    hasSearched = true;
+                    document.body.classList.remove('state-empty');
+                    document.body.classList.add('state-active');
+                }
+            }
 
 
             let currentLat = null;
@@ -588,6 +625,8 @@
                 const query = addressInput.value.trim();
                 if (!query) return;
                 
+                triggerSearchState();
+                
                 errorMsg.classList.add('hidden');
                 loaderContainer.classList.remove('hidden');
                 grid.innerHTML = '';
@@ -624,6 +663,7 @@
                     return;
                 }
                 geoBtn.innerText = 'Standort wird ermittelt...';
+                triggerSearchState();
                 navigator.geolocation.getCurrentPosition((position) => {
                     currentLat = position.coords.latitude;
                     currentLng = position.coords.longitude;
@@ -657,8 +697,7 @@
             });
 
             // Init
-
-            fetchCafes();
+            // fetchCafes();
         });
     </script>
 </body>
