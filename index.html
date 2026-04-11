@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Café Guide München | Live Daten</title>
+    <meta name="description" content="Ein kuratierter Guide zu den bestbewerteten Cafés in München. Mit echten Google-Bewertungen und Live-Daten.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FAFAF7;
+            --text-color: #1a1a1a;
+            --accent-color: #6B3F1F;
+            --card-border: rgba(26, 26, 26, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        header {
+            text-align: center;
+            padding: 100px 20px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            line-height: 1.1;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #4a4a4a;
+            margin-bottom: 40px;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #4a4a4a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--text-color);
+            color: var(--text-color);
+        }
+
+        .filter-btn.active {
+            background: var(--text-color);
+            color: var(--bg-color);
+            border-color: var(--text-color);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            padding-bottom: 40px;
+        }
+
+        @media (min-width: 768px) {
+            main { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            main { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cafe-card {
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .cafe-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(107, 63, 31, 0.3);
+            box-shadow: 0 12px 32px rgba(26,26,26,0.05);
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #FAFAF7;
+            border: 1px solid rgba(0,0,0,0.06);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            margin-bottom: 24px;
+            align-self: flex-start;
+        }
+
+        .rating-count {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #7a7a7a;
+        }
+
+        .cafe-name {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .address-hours {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .address-hours p {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(107, 63, 31, 0.04);
+            border: 1px solid rgba(107, 63, 31, 0.15);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .tag-open {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(46, 125, 50, 0.1);
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .tag-closed {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(211, 47, 47, 0.1);
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .editorial {
+            font-size: 0.95rem;
+            color: #4a4a4a;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .reviews-section {
+            margin-top: auto;
+            border-top: 1px solid var(--card-border);
+            padding-top: 20px;
+            margin-bottom: 24px;
+        }
+
+        .reviews-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: #7a7a7a;
+            margin-bottom: 12px;
+        }
+
+        .review p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .maps-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            margin-top: auto;
+        }
+
+        .maps-btn:hover {
+            background: var(--text-color);
+            color: white;
+        }
+
+
+        /* Location Search Styling */
+        .location-search-container { margin: 0 auto 30px; max-width: 600px; display: flex; flex-direction: column; gap: 16px; }
+        .search-bar { display: flex; gap: 8px; background: white; padding: 8px; border-radius: 30px; border: 1px solid var(--card-border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .search-bar input { flex: 1; border: none; outline: none; padding: 8px 16px; font-size: 1rem; font-family: 'Inter', sans-serif; background: transparent; min-width: 0; }
+        .search-bar button { background: var(--text-color); color: white; border: none; padding: 10px 24px; border-radius: 30px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+        .search-bar button:hover { background: var(--accent-color); }
+        .radius-toggles { display: flex; justify-content: center; gap: 12px; }
+        .radius-btn { background: transparent; border: 1px solid var(--card-border); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; color: #4a4a4a; cursor: pointer; transition: var(--transition); }
+        .radius-btn:hover { border-color: var(--text-color); color: var(--text-color); }
+        .radius-btn.active { background: var(--text-color); color: var(--bg-color); border-color: var(--text-color); }
+        .location-actions { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+        .geo-btn { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none; color: var(--accent-color); font-weight: 600; font-size: 0.95rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; transition: var(--transition); }
+        .geo-btn:hover { opacity: 0.8; }
+        .reset-location-btn { background: transparent; border: none; color: #7a7a7a; font-size: 0.85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+        .reset-location-btn:hover { color: #d32f2f; }
+        .distance-badge { position: absolute; top: 32px; right: 32px; background: #fdfdfd; color: #555; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(0,0,0,0.08); z-index: 2; }
+
+        /* Loading & Error States */
+        .actions {
+            text-align: center;
+            padding: 0 20px 80px;
+        }
+
+        .loader-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--card-border);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .primary-btn {
+            background: var(--text-color);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .primary-btn:hover {
+            background: var(--accent-color);
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 40px;
+            color: #d32f2f;
+            grid-column: 1 / -1;
+        }
+
+        .error-state p { margin-bottom: 20px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Die besten Cafés in München</h1>
+        <p>Live-Daten aus Google Maps &middot; Immer aktuell</p>
+        
+
+        <div class="location-search-container">
+            <div class="search-bar">
+                <input type="text" id="address-input" placeholder="Adresse oder Ort eingeben..." aria-label="Adresse suchen">
+                <button id="search-address-btn">Suchen</button>
+            </div>
+            <div class="radius-toggles">
+                <button class="radius-btn" data-radius="2000">2 km</button>
+                <button class="radius-btn active" data-radius="5000">5 km</button>
+                <button class="radius-btn" data-radius="10000">10 km</button>
+            </div>
+            <div class="location-actions">
+                <button id="geo-btn" class="geo-btn">📍 Meinen Standort verwenden</button>
+                <button id="reset-location-btn" class="reset-location-btn hidden">× Standort zurücksetzen</button>
+            </div>
+        </div>
+
+        <div class="filter-bar border-box">
+
+            <button class="filter-btn active" data-filter="all">Alle</button>
+            <button class="filter-btn" data-filter="dogs">Hunde willkommen</button>
+            <button class="filter-btn" data-filter="kids">Kindgerecht</button>
+        </div>
+    </header>
+
+    <main id="cafe-grid">
+        <div id="loader-container" class="loader-container">
+            <div class="loader"></div>
+        </div>
+        <div id="error-message" class="error-state hidden">
+            <p>Es gab ein Problem beim Laden der Cafés. Bitte überprüfe deine Verbindung und versuche es erneut.</p>
+            <button id="retry-btn" class="primary-btn">Erneut versuchen</button>
+        </div>
+    </main>
+
+    <div class="actions">
+        <button id="load-more-btn" class="primary-btn hidden">Weitere Cafés laden</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const grid = document.getElementById('cafe-grid');
+            const loaderContainer = document.getElementById('loader-container');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const errorMsg = document.getElementById('error-message');
+            const retryBtn = document.getElementById('retry-btn');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            let allPlaces = [];
+            let nextPageToken = null;
+            let currentFilter = 'all';
+
+
+            let currentLat = null;
+            let currentLng = null;
+            let currentRadius = 5000;
+
+            function getDistanceInKm(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+
+            async function fetchCafes(token = null) {
+                try {
+                    errorMsg.classList.add('hidden');
+                    if (!token) {
+                        loaderContainer.classList.remove('hidden');
+                        allPlaces = [];
+                        grid.innerHTML = '';
+                        grid.appendChild(loaderContainer);
+                        grid.appendChild(errorMsg);
+                    } else {
+                        // Adding a subtle specific button loading state
+                        loadMoreBtn.innerText = 'Lade...';
+                    }
+                    
+                    let url = token ? `/api/cafes/more?pageToken=${token}` : `/api/cafes`;
+                    if (currentLat && currentLng) {
+                        url = token ? `/api/cafes/nearby?lat=${currentLat}&lng=${currentLng}&radius=${currentRadius}&pageToken=${token}` : `/api/cafes/nearby?lat=${currentLat}&lng=${currentLng}&radius=${currentRadius}`;
+                    }
+                    const res = await fetch(url);
+                    
+                    if (!res.ok) throw new Error('API Error');
+                    const data = await res.json();
+                    
+                    if (data.places && data.places.length > 0) {
+                        allPlaces = [...allPlaces, ...data.places];
+                        renderCafes();
+                    }
+                    
+                    nextPageToken = data.nextPageToken;
+                    
+                    if (nextPageToken) {
+                        loadMoreBtn.classList.remove('hidden');
+                    } else {
+                        loadMoreBtn.classList.add('hidden');
+                    }
+                } catch (err) {
+                    console.error('Fetch error:', err);
+                    if (!token) {
+                        errorMsg.classList.remove('hidden');
+                    } else {
+                        alert('Fehler beim Laden weiterer Cafés.');
+                    }
+                } finally {
+                    loaderContainer.classList.add('hidden');
+                    loadMoreBtn.innerText = 'Weitere Cafés laden';
+                }
+            }
+
+            function renderCafes() {
+                // Clear all cards
+                document.querySelectorAll('.cafe-card').forEach(c => c.remove());
+                
+                let filtered = allPlaces;
+                if (currentFilter === 'dogs') {
+                    filtered = filtered.filter(p => p.allowsDogs === true);
+                } else if (currentFilter === 'kids') {
+                    filtered = filtered.filter(p => p.goodForChildren === true);
+                }
+
+
+                if (currentLat && currentLng) {
+                    filtered.forEach(p => {
+                        if (p.location) {
+                            p.distKm = getDistanceInKm(currentLat, currentLng, p.location.latitude, p.location.longitude);
+                        } else {
+                            p.distKm = 999;
+                        }
+                    });
+                    filtered.sort((a, b) => a.distKm - b.distKm);
+                }
+
+                filtered.forEach((place, index) => {
+
+                    const card = document.createElement('article');
+                    card.className = 'cafe-card';
+                    card.style.animationDelay = `${(index % 9) * 0.1}s`;
+
+                    // Extract review snippet
+                    let reviewSnippet = '';
+                    if (place.reviews && place.reviews.length > 0) {
+                        const text = place.reviews[0].text?.text || place.reviews[0].originalText?.text || '';
+                        if (text) {
+                            reviewSnippet = text.length > 180 ? text.substring(0, 180) + '...' : text;
+                        }
+                    }
+
+                    // Tags
+                    const tags = [];
+                    if (place.allowsDogs) tags.push('<span class="tag">Hunde willkommen</span>');
+                    if (place.goodForChildren) tags.push('<span class="tag">Kinderfreundlich</span>');
+                    if (place.regularOpeningHours) {
+                        if (place.regularOpeningHours.openNow) {
+                            tags.push('<span class="tag-open">Geöffnet</span>');
+                        } else {
+                            tags.push('<span class="tag-closed">Geschlossen</span>');
+                        }
+                    }
+
+                    // Today's hours
+                    let todayHours = 'Keine Angaben';
+                    if (place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
+                        const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0, Sun=6
+                        todayHours = place.regularOpeningHours.weekdayDescriptions[todayIdx] || todayHours;
+                    }
+
+                    const editorial = place.editorialSummary?.text || '';
+                    const rating = place.rating || '-';
+                    const reviewsCount = place.userRatingCount || 0;
+                    const mapUrl = place.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.formattedAddress)}`;
+                    const displayName = place.displayName?.text || 'Café';
+
+                    let distanceBadge = '';
+                    if (currentLat && currentLng && place.distKm !== undefined && place.distKm !== 999) {
+                         const distStr = place.distKm < 1 ? (Math.round(place.distKm*1000) + ' m') : (place.distKm.toFixed(1) + ' km');
+                         distanceBadge = `<div class="distance-badge">${distStr} entfernt</div>`;
+                    }
+
+                    card.innerHTML = `
+                        ${distanceBadge}
+
+                        <div class="rating-badge">★ ${rating} <span class="rating-count">(${reviewsCount} Bew.)</span></div>
+                        <h2 class="cafe-name">${displayName}</h2>
+                        <div class="address-hours">
+                            <p>📍 ${place.formattedAddress || 'Adresse unbekannt'}</p>
+                            <p>🕒 ${todayHours}</p>
+                        </div>
+                        <div class="tags">
+                            ${tags.join('')}
+                        </div>
+                        ${editorial ? '<p class="editorial">' + editorial + '</p>' : ''}
+                        ${reviewSnippet ? '<div class="reviews-section">\n' +
+                                '                                <h3 class="reviews-title">Was Besucher sagen</h3>\n' +
+                                '                                <div class="review"><p>"' + reviewSnippet + '"</p></div>\n' +
+                                '                            </div>' : ''}
+                    `;
+                    
+                    grid.insertBefore(card, errorMsg);
+                });
+            }
+
+            // Events
+            loadMoreBtn.addEventListener('click', () => fetchCafes(nextPageToken));
+            retryBtn.addEventListener('click', () => fetchCafes(null));
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(f => f.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderCafes();
+                });
+            });
+
+
+            const addressInput = document.getElementById('address-input');
+            const searchAddressBtn = document.getElementById('search-address-btn');
+            const geoBtn = document.getElementById('geo-btn');
+            const resetLocationBtn = document.getElementById('reset-location-btn');
+            const radiusBtns = document.querySelectorAll('.radius-btn');
+
+            async function performSearchByAddress() {
+                const query = addressInput.value.trim();
+                if (!query) return;
+                
+                errorMsg.classList.add('hidden');
+                loaderContainer.classList.remove('hidden');
+                grid.innerHTML = '';
+                grid.appendChild(loaderContainer);
+                grid.appendChild(errorMsg);
+                
+                try {
+                    const res = await fetch(`/api/geocode?address=${encodeURIComponent(query)}`);
+                    const data = await res.json();
+                    if (!res.ok || data.error) {
+                        throw new Error(data.error || 'Geocoding failed');
+                    }
+                    
+                    currentLat = data.lat;
+                    currentLng = data.lng;
+                    resetLocationBtn.classList.remove('hidden');
+                    fetchCafes(null);
+                } catch (e) {
+                    console.error(e);
+                    loaderContainer.classList.add('hidden');
+                    errorMsg.innerHTML = '<p>Adresse nicht gefunden. Bitte versuche es erneut.</p>';
+                    errorMsg.classList.remove('hidden');
+                }
+            }
+
+            searchAddressBtn.addEventListener('click', performSearchByAddress);
+            addressInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearchByAddress();
+            });
+
+            geoBtn.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    alert('Geolocation is not supported by your browser');
+                    return;
+                }
+                geoBtn.innerText = 'Standort wird ermittelt...';
+                navigator.geolocation.getCurrentPosition((position) => {
+                    currentLat = position.coords.latitude;
+                    currentLng = position.coords.longitude;
+                    geoBtn.innerText = '📍 Meinen Standort verwenden';
+                    resetLocationBtn.classList.remove('hidden');
+                    addressInput.value = ''; // clear text if using gps
+                    fetchCafes(null);
+                }, () => {
+                    alert('Unable to retrieve your location');
+                    geoBtn.innerText = '📍 Meinen Standort verwenden';
+                });
+            });
+
+            resetLocationBtn.addEventListener('click', () => {
+                currentLat = null;
+                currentLng = null;
+                addressInput.value = '';
+                resetLocationBtn.classList.add('hidden');
+                fetchCafes(null);
+            });
+
+            radiusBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    radiusBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentRadius = parseInt(btn.dataset.radius);
+                    if (currentLat && currentLng) {
+                        fetchCafes(null);
+                    }
+                });
+            });
+
+            // Init
+
+            fetchCafes();
+        });
+    </script>
+</body>
+</html>
