@@ -19,7 +19,7 @@ const PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchText';
 const getHeaders = () => ({
     'Content-Type': 'application/json',
     'X-Goog-Api-Key': API_KEY,
-    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.regularOpeningHours,places.googleMapsUri,places.websiteUri,places.editorialSummary,places.reviews,places.goodForChildren,places.allowsDogs,places.accessibilityOptions,places.location,nextPageToken'
+    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.regularOpeningHours,places.googleMapsUri,places.websiteUri,places.editorialSummary,places.reviews,places.goodForChildren,places.allowsDogs,places.accessibilityOptions,places.location,places.paymentOptions,nextPageToken'
 });
 
 app.get('/api/cafes', async (req, res) => {

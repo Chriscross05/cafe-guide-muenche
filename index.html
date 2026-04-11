@@ -205,6 +205,16 @@
             font-weight: 600;
         }
 
+        .tag-gray {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #555;
+            font-weight: 600;
+        }
+
         .editorial {
             font-size: 0.95rem;
             color: #4a4a4a;
@@ -500,6 +510,13 @@
                             tags.push('<span class="tag-open">Geöffnet</span>');
                         } else {
                             tags.push('<span class="tag-closed">Geschlossen</span>');
+                        }
+                    }
+                    if (place.paymentOptions) {
+                        if (place.paymentOptions.acceptsCreditCards === true || place.paymentOptions.acceptsDebitCards === true) {
+                            tags.push('<span class="tag-open">💳 Kartenzahlung</span>');
+                        } else if (place.paymentOptions.acceptsCreditCards === false || place.paymentOptions.acceptsDebitCards === false) {
+                            tags.push('<span class="tag-gray">Nur Bar</span>');
                         }
                     }
 
