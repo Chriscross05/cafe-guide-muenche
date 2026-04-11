@@ -513,8 +513,9 @@
                     const editorial = place.editorialSummary?.text || '';
                     const rating = place.rating || '-';
                     const reviewsCount = place.userRatingCount || 0;
-                    const mapUrl = place.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.formattedAddress)}`;
                     const displayName = place.displayName?.text || 'Café';
+                    const mapQuery = encodeURIComponent(`${displayName} ${place.formattedAddress || ''}`.trim());
+                    const mapUrl = place.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
                     let distanceBadge = '';
                     if (currentLat && currentLng && place.distKm !== undefined && place.distKm !== 999) {
@@ -539,6 +540,7 @@
                                 '                                <h3 class="reviews-title">Was Besucher sagen</h3>\n' +
                                 '                                <div class="review"><p>"' + reviewSnippet + '"</p></div>\n' +
                                 '                            </div>' : ''}
+                        <a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="maps-btn">Auf Google Maps öffnen</a>
                     `;
                     
                     grid.insertBefore(card, errorMsg);
