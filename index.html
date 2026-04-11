@@ -393,6 +393,7 @@
             <button class="filter-btn active" data-filter="all">Alle</button>
             <button class="filter-btn" data-filter="dogs">Hunde willkommen</button>
             <button class="filter-btn" data-filter="kids">Kindgerecht</button>
+            <button class="filter-btn" data-filter="cards">Kartenzahlung</button>
         </div>
     </header>
 
@@ -505,6 +506,8 @@
                     filtered = filtered.filter(p => p.allowsDogs === true);
                 } else if (currentFilter === 'kids') {
                     filtered = filtered.filter(p => p.goodForChildren === true);
+                } else if (currentFilter === 'cards') {
+                    filtered = filtered.filter(p => p.paymentOptions && (p.paymentOptions.acceptsCreditCards === true || p.paymentOptions.acceptsDebitCards === true));
                 }
 
 
