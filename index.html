@@ -225,35 +225,23 @@
         .item-text { font-size: 1.05rem; }
 
         /* Section - Foto-Wall */
-        .upload-zone {
-            border: 2px dashed var(--accent-gold);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 2rem;
-            background: rgba(201, 168, 76, 0.05);
-        }
-        .upload-zone.dragover { background: rgba(201, 168, 76, 0.15); border-color: #fff; }
-        .upload-text { color: var(--accent-gold); font-weight: 500; font-size: 1.1rem; }
+        .upload-zone { margin-bottom: 2rem; background: transparent; padding: 0; border: none; text-align: center; }
         .upload-input-group { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
         .photo-name-input { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.75rem; border-radius: 6px; font-family: var(--font-body); min-height: 48px; width: 100%; box-sizing: border-box;}
         .upload-progress { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 1.5rem; display: none; overflow: hidden; }
         .upload-progress-bar { height: 100%; background: var(--accent-gold); width: 0%; transition: width 0.3s; }
         
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
+        .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         @media (min-width: 600px) { .photo-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 900px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
         
         .photo-item { border-radius: 8px; overflow: hidden; position: relative; background: var(--card-bg); cursor: pointer; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.05); }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         .photo-item:hover img { transform: scale(1.05); }
-        .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.85rem; text-align: center; }
+        .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.85rem; text-align: center; pointer-events: none; }
+        .photo-delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.9); color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: opacity 0.3s; opacity: 0; border: none; z-index: 10; padding: 0; margin: 0; cursor: pointer; }
+        .photo-item.show-delete .photo-delete-btn { opacity: 1; pointer-events: auto; }
+        @media (hover: hover) { .photo-item:hover .photo-delete-btn { opacity: 1; pointer-events: auto; } }
         
         .empty-photos { text-align: center; color: var(--text-secondary); padding: 3rem 1rem; font-style: italic; grid-column: 1 / -1; }
         
@@ -438,12 +426,21 @@
         <h2 class="section-title">📸 Die Foto-Wall</h2>
         
         <div class="upload-zone" id="upload-zone">
-            <div class="upload-text">Foto hier reinziehen oder klicken</div>
-            <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp, image/heic" style="display: none;">
-            <div class="upload-input-group">
-                <input type="text" id="photo-name" class="photo-name-input" placeholder="Dein Name (optional)" maxlength="30">
-                <button class="btn" id="upload-btn" style="margin-top: 0;">Hochladen</button>
+            <button class="btn" id="select-photo-btn" style="height: 60px; font-size: 1.2rem; background: rgba(201,168,76,0.15);">📷 Foto auswählen</button>
+            <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
+            
+            <div id="preview-container" style="display:none; margin-top: 1.5rem; text-align: center;">
+                <div style="position: relative; display: inline-block;">
+                    <img id="photo-preview" src="" style="max-height: 200px; border-radius: 8px; border: 1px solid var(--accent-gold);">
+                    <button id="remove-preview-btn" style="position: absolute; top: -10px; right: -10px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+                </div>
             </div>
+
+            <div class="upload-input-group" id="upload-form" style="display:none;">
+                <input type="text" id="photo-name" class="photo-name-input" placeholder="Dein Name (optional)" maxlength="30">
+                <button class="btn" id="upload-btn" style="margin-top: 0; background: var(--accent-gold); color: var(--bg-color);">Hochladen</button>
+            </div>
+            
             <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
             <div id="upload-msg" style="margin-top: 1rem; font-size: 0.95rem; font-weight: 500;"></div>
         </div>
@@ -716,8 +713,13 @@
         renderShopping();
 
         // --- 5. Photo Wall Logic ---
-        const uploadZone = document.getElementById('upload-zone');
         const fileInput = document.getElementById('file-input');
+        const selectPhotoBtn = document.getElementById('select-photo-btn');
+        const previewContainer = document.getElementById('preview-container');
+        const photoPreview = document.getElementById('photo-preview');
+        const removePreviewBtn = document.getElementById('remove-preview-btn');
+        const uploadForm = document.getElementById('upload-form');
+        
         const uploadBtn = document.getElementById('upload-btn');
         const photoName = document.getElementById('photo-name');
         const uploadProgress = document.getElementById('upload-progress');
@@ -726,29 +728,35 @@
         const photoGrid = document.getElementById('photo-grid');
         let selectedFile = null;
 
-        // Drag & Drop Handling
-        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
-        });
+        selectPhotoBtn.addEventListener('click', () => fileInput.click());
         
-        uploadZone.addEventListener('click', (e) => {
-            if (e.target !== photoName && e.target !== uploadBtn) fileInput.click();
-        });
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+        });
+        
+        removePreviewBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            previewContainer.style.display = 'none';
+            uploadForm.style.display = 'none';
+            selectPhotoBtn.style.display = 'block';
         });
 
         function handleFileSelect(file) {
             if (!file.type.match('image.*')) {
-                showMsg('Bitte nur Bilder hochladen!', 'red');
+                showMsg('Bitte nur Bilder ausw\u00e4hlen!', 'red');
                 return;
             }
             selectedFile = file;
-            document.querySelector('.upload-text').innerText = 'Ausgewählt: ' + file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photoPreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+                uploadForm.style.display = 'flex';
+                selectPhotoBtn.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
         }
 
         function showMsg(text, color) {
@@ -772,7 +780,6 @@
             uploadBtn.disabled = true;
 
             try {
-                // Determine rough progress via internal timeout
                 const pushInt = setInterval(() => {
                     let w = parseInt(uploadProgressBar.style.width);
                     if (w < 90) uploadProgressBar.style.width = (w + 10) + '%';
@@ -788,16 +795,14 @@
 
                 if (res.ok) {
                     showMsg('Foto hochgeladen! 🍺', '#4caf50');
-                    selectedFile = null;
-                    document.querySelector('.upload-text').innerText = 'Foto hier reinziehen oder klicken';
-                    photoName.value = '';
-                    fetchPhotos(); // instant refresh
+                    removePreviewBtn.click(); // Reset state
+                    fetchPhotos();
                 } else {
                     const data = await res.json();
                     showMsg(data.error || 'Fehler beim Hochladen.', 'red');
                 }
             } catch (err) {
-                showMsg('Netzwerkfehler.', 'red');
+                showMsg('Netzwerkfehler beim Hochladen. Bild vielleicht zu gro\u00df?', 'red');
             } finally {
                 setTimeout(() => { uploadProgress.style.display = 'none'; uploadProgressBar.style.width = '0'; uploadBtn.disabled = false; }, 1000);
             }
@@ -819,10 +824,32 @@
                     const el = document.createElement('div');
                     el.className = 'photo-item';
                     el.innerHTML = `<img src="${photo.thumbnail_url}" alt="JGA Photo" loading="lazy">`;
-                    if (photo.name) {
-                        el.innerHTML += `<div class="photo-caption">${photo.name}</div>`;
-                    }
-                    el.onclick = () => openLightbox(photo.url);
+                    if (photo.name) el.innerHTML += `<div class="photo-caption">${photo.name}</div>`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'photo-delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        if (confirm('Foto wirklich löschen?')) {
+                            const res = await fetch(`/api/photos?id=${encodeURIComponent(photo.id)}`, { method: 'DELETE' });
+                            if (res.ok) fetchPhotos();
+                        }
+                    };
+                    el.appendChild(deleteBtn);
+                    
+                    let pressTimer;
+                    el.addEventListener('touchstart', () => {
+                        pressTimer = setTimeout(() => el.classList.add('show-delete'), 600);
+                    });
+                    el.addEventListener('touchend', () => clearTimeout(pressTimer));
+                    el.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+                    el.onclick = (e) => {
+                        if (e.target === deleteBtn) return;
+                        openLightbox(photo.url);
+                    };
+                    
                     photoGrid.appendChild(el);
                 });
             } catch (err) {

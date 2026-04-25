@@ -19,7 +19,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
 // Serve static files from the current directory (to serve index.html)
 app.use(express.static(__dirname));
@@ -179,14 +179,24 @@ app.post('/api/photos/upload', upload.single('photo'), (req, res) => {
     }
     const name = (req.body.name || '').replace(/\||=/g, ''); // sanitize for context string
     
+    let isTimeout = false;
+    const timeoutId = setTimeout(() => {
+        isTimeout = true;
+        res.status(504).json({ error: 'Upload timeout - Bild ist zu groß oder Verbindung zu langsam.' });
+    }, 30000);
+
     const stream = cloudinary.uploader.upload_stream(
         { folder: 'linos-jga', context: `name=${name}` }, 
         (error, result) => {
+            if (isTimeout) return;
+            clearTimeout(timeoutId);
+
             if (error) {
                 console.error('Cloudinary upload error:', error);
-                return res.status(500).json({ error: 'Failed to upload photo' });
+                return res.status(500).json({ error: 'Fehler beim Hochladen: ' + error.message });
             }
             res.json({
+                id: result.public_id,
                 url: result.secure_url,
                 thumbnail_url: cloudinary.url(result.public_id, { width: 400, crop: "fill", secure: true }),
                 name: name,
@@ -194,6 +204,15 @@ app.post('/api/photos/upload', upload.single('photo'), (req, res) => {
             });
         }
     );
+    // Explicit error handling on stream
+    stream.on('error', err => {
+        if (!isTimeout) {
+            clearTimeout(timeoutId);
+            console.error('Stream error:', err);
+            res.status(500).json({ error: 'Stream Fehler: ' + err.message });
+        }
+    });
+
     stream.end(req.file.buffer);
 });
 
@@ -203,6 +222,7 @@ app.get('/api/photos', async (req, res) => {
         
         let photos = result.resources.map(res => {
             return {
+                id: res.public_id,
                 url: res.secure_url,
                 thumbnail_url: cloudinary.url(res.public_id, { width: 400, crop: "fill", secure: true }),
                 name: (res.context && res.context.custom && res.context.custom.name) ? res.context.custom.name : '',
@@ -215,6 +235,18 @@ app.get('/api/photos', async (req, res) => {
     } catch (error) {
         console.error('Cloudinary fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch photos' });
+    }
+});
+
+app.delete('/api/photos', async (req, res) => {
+    const publicId = req.query.id;
+    if (!publicId) return res.status(400).json({ error: 'No public ID provided' });
+    try {
+        await cloudinary.uploader.destroy(publicId);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Cloudinary delete error:', err);
+        res.status(500).json({ error: 'Failed to delete photo' });
     }
 });
 
