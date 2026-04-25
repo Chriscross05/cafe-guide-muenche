@@ -11,6 +11,16 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 app.use(cors());
 app.use(express.json());
 
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
 // Serve static files from the current directory (to serve index.html)
 app.use(express.static(__dirname));
 
@@ -160,6 +170,51 @@ app.get('/api/cafes/nearby', async (req, res) => {
     } catch (error) {
         console.error('Error in /api/cafes/nearby:', error);
         res.status(500).json({ error: 'Failed to fetch nearby cafes' });
+    }
+});
+
+app.post('/api/photos/upload', upload.single('photo'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
+    }
+    const name = (req.body.name || '').replace(/\||=/g, ''); // sanitize for context string
+    
+    const stream = cloudinary.uploader.upload_stream(
+        { folder: 'linos-jga', context: `name=${name}` }, 
+        (error, result) => {
+            if (error) {
+                console.error('Cloudinary upload error:', error);
+                return res.status(500).json({ error: 'Failed to upload photo' });
+            }
+            res.json({
+                url: result.secure_url,
+                thumbnail_url: cloudinary.url(result.public_id, { width: 400, crop: "fill", secure: true }),
+                name: name,
+                timestamp: result.created_at
+            });
+        }
+    );
+    stream.end(req.file.buffer);
+});
+
+app.get('/api/photos', async (req, res) => {
+    try {
+        const result = await cloudinary.api.resources({ type: 'upload', prefix: 'linos-jga/', max_results: 100, context: true });
+        
+        let photos = result.resources.map(res => {
+            return {
+                url: res.secure_url,
+                thumbnail_url: cloudinary.url(res.public_id, { width: 400, crop: "fill", secure: true }),
+                name: (res.context && res.context.custom && res.context.custom.name) ? res.context.custom.name : '',
+                timestamp: res.created_at
+            };
+        });
+        
+        photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        res.json(photos);
+    } catch (error) {
+        console.error('Cloudinary fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch photos' });
     }
 });
 
