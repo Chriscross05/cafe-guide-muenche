@@ -765,21 +765,49 @@
             setTimeout(() => { uploadMsg.innerText = ''; }, 6000);
         }
 
+        async function compressImage(file, maxSizeMB = 8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 2048;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) { height = (height / width) * maxDim; width = maxDim; }
+                            else { width = (width / height) * maxDim; height = maxDim; }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         uploadBtn.addEventListener('click', async () => {
             if (!selectedFile) {
                 showMsg('Bitte zuerst ein Foto auswählen.', 'var(--accent-gold)');
                 return;
             }
             
-            const formData = new FormData();
-            formData.append('photo', selectedFile);
-            if (photoName.value) formData.append('name', photoName.value);
-
             uploadProgress.style.display = 'block';
-            uploadProgressBar.style.width = '10%';
+            uploadProgressBar.style.width = '5%';
             uploadBtn.disabled = true;
 
             try {
+                const compressedBlob = await compressImage(selectedFile);
+                
+                const formData = new FormData();
+                formData.append('photo', compressedBlob, selectedFile.name);
+                if (photoName.value) formData.append('name', photoName.value);
+
                 const pushInt = setInterval(() => {
                     let w = parseInt(uploadProgressBar.style.width);
                     if (w < 90) uploadProgressBar.style.width = (w + 10) + '%';
@@ -802,7 +830,7 @@
                     showMsg(data.error || 'Fehler beim Hochladen.', 'red');
                 }
             } catch (err) {
-                showMsg('Netzwerkfehler beim Hochladen. Bild vielleicht zu gro\u00df?', 'red');
+                showMsg('Netzwerkfehler beim Hochladen. Bild vielleicht immer noch zu gro\u00df?', 'red');
             } finally {
                 setTimeout(() => { uploadProgress.style.display = 'none'; uploadProgressBar.style.width = '0'; uploadBtn.disabled = false; }, 1000);
             }
