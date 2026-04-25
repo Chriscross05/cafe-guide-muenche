@@ -63,7 +63,7 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
         .cd-num { font-family: var(--font-headings); font-size: 2.2rem; color: var(--accent-gold); display: block; line-height: 1.1; }
-        .cd-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+        .cd-label { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
         .cd-footer { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; }
 
         /* Section 2 - Crew */
@@ -121,19 +121,23 @@
         .info-label { color: var(--text-secondary); }
         .info-value { color: var(--text-primary); text-align: right; font-weight: 500; }
         .info-note { font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
-        .btn-group { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-group { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
         .btn {
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: rgba(201, 168, 76, 0.1);
             color: var(--accent-gold);
-            padding: 0.7rem 1rem;
+            padding: 0.75rem 1rem;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 500;
             border: 1px solid rgba(201, 168, 76, 0.3);
             transition: all 0.2s;
             text-align: center;
-            flex: 1; min-width: 150px;
+            width: 100%;
+            min-height: 48px;
+            box-sizing: border-box;
         }
         .btn:hover { background: rgba(201, 168, 76, 0.2); }
 
@@ -141,8 +145,8 @@
         .tabs { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; background: var(--card-bg); padding: 0.5rem; border-radius: 10px; }
         .tab-btn {
             background: transparent; color: var(--text-secondary); border: none;
-            padding: 0.6rem 1rem; font-family: var(--font-body); font-size: 0.95rem; font-weight: 500;
-            border-radius: 6px; cursor: pointer; flex: 1; transition: 0.2s;
+            padding: 0.75rem 0.5rem; font-family: var(--font-body); font-size: 1rem; font-weight: 500;
+            border-radius: 6px; cursor: pointer; flex: 1; transition: 0.2s; min-height: 48px;
         }
         .tab-btn.active { background: var(--accent-gold); color: var(--bg-color); }
         
@@ -173,8 +177,8 @@
         .time { display: block; font-family: var(--font-headings); color: var(--accent-gold); font-size: 1.2rem; margin-bottom: 0.25rem; }
         .event-title { font-weight: 600; font-size: 1.15rem; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
         .event-loc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;}
-        .badge-jetzt { background: var(--accent-gold); color: var(--bg-color); font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-family: var(--font-body); font-weight: 600; text-transform: uppercase; }
-        .event .btn { margin-top: 1rem; display: inline-block; flex: none; width: auto; font-size: 0.85rem; padding: 0.5rem 1rem;}
+        .badge-jetzt { background: var(--accent-gold); color: var(--bg-color); font-size: 0.85rem; padding: 0.25rem 0.5rem; border-radius: 4px; font-family: var(--font-body); font-weight: 600; text-transform: uppercase; }
+        .event .btn { margin-top: 0.75rem; display: flex; flex: none; width: 100%; font-size: 0.95rem; min-height: 48px; padding: 0.75rem 1rem;}
 
         /* Section 5 - Abstimmungen */
         .vote-section { margin-bottom: 3rem; }
@@ -192,15 +196,15 @@
         .voter-names { display: flex; flex-wrap: wrap; gap: 0.5rem; }
         .voter-badge {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 0.3rem 0.7rem;
-            border-radius: 20px; cursor: pointer; transition: all 0.2s; user-select: none;
-            min-height: 44px; display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.4); font-size: 0.95rem; padding: 0.5rem 1rem;
+            border-radius: 24px; cursor: pointer; transition: all 0.2s; user-select: none;
+            min-height: 48px; display: flex; align-items: center; justify-content: center;
         }
         .voter-badge:hover { background: rgba(255,255,255,0.1); }
         .voter-badge.active {
             background: var(--accent-gold); border-color: var(--accent-gold); color: var(--bg-color); font-weight: 600;
         }
-        .vote-instruction { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; font-style: italic; }
+        .vote-instruction { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
 
         /* Section 6 - Shoppingliste */
         .checklist { list-style: none; padding: 0; margin: 0; }
@@ -222,7 +226,7 @@
 
         /* Footer */
         footer { text-align: center; padding: 3rem 1.5rem 5rem; color: var(--text-secondary); font-size: 0.9rem; }
-        .section-title { text-align: center; font-size: 2.2rem; margin-bottom: 2.5rem; color: var(--text-primary); }
+        .section-title { text-align: center; font-size: 1.75rem; margin-bottom: 2rem; color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -313,7 +317,7 @@
                 <span class="time">10:00</span>
                 <div class="event-title">Laser Game — Slot 1</div>
                 <div class="event-loc">Jankovcova 1569, 170 00 Praha 7-Holešovice</div>
-                <a href="https://maps.google.com/?q=Jankovcova+1569,+170+00+Praha+7-Holešovice,+Tschechien" target="_blank" class="btn" style="margin-right: 0.5rem;">Auf Google Maps öffnen</a>
+                <a href="https://maps.google.com/?q=Jankovcova+1569,+170+00+Praha+7-Holešovice,+Tschechien" target="_blank" class="btn">Auf Google Maps öffnen</a>
                 <a href="https://mercurialaser.cz/" target="_blank" class="btn">Website öffnen</a>
             </div>
             <div class="event" data-start="2026-05-02T10:20:00+02:00" data-end="2026-05-02T11:00:00+02:00">
@@ -340,7 +344,7 @@
                 <span class="time">15:00</span>
                 <div class="event-title">Bier Cycle Boat</div>
                 <div class="event-loc">nábř. L. Svobody 1, 110 00 Nové Město<br>90 Minuten · Start und Ende am selben Punkt · 500€ all in</div>
-                <a href="https://maps.google.com/?q=nábř.+L.+Svobody+1,+110+00+Nové+Město,+Tschechien" target="_blank" class="btn" style="margin-right: 0.5rem;">Auf Google Maps öffnen</a>
+                <a href="https://maps.google.com/?q=nábř.+L.+Svobody+1,+110+00+Nové+Město,+Tschechien" target="_blank" class="btn">Auf Google Maps öffnen</a>
                 <a href="https://www.partytretboot.de/" target="_blank" class="btn">Website öffnen</a>
             </div>
             <div class="event" data-start="2026-05-02T19:00:00+02:00" data-end="2026-05-02T21:00:00+02:00">
